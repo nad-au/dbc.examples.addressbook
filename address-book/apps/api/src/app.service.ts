@@ -1,13 +1,13 @@
 import { map, mapArray, Neo4jService } from '@dbc-tech/nest-neo4j';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ActorEntity } from './entities/actor.entity';
-import { MovieEntity } from './entities/movie.entity';
+import { ActorNode } from './entities/actor.node';
+import { MovieNode } from './entities/movie.node';
 
 @Injectable()
 export class AppService {
   constructor(private readonly neo4jService: Neo4jService) {}
 
-  async getActors(): Promise<ActorEntity[]> {
+  async getActors(): Promise<ActorNode[]> {
     const result = await this.neo4jService.read(
       `
     MATCH (actor:Person)-[:ACTED_IN]->(movie:Movie)
@@ -15,14 +15,14 @@ export class AppService {
   `,
     );
     return result.records.map((r) => {
-      const actor = map(r, 'actor', ActorEntity);
-      actor.movies = mapArray(r, 'movies', MovieEntity);
+      const actor = map(r, 'actor', ActorNode);
+      actor.movies = mapArray(r, 'movies', MovieNode);
 
       return actor;
     });
   }
 
-  async getActor(actorName: string): Promise<ActorEntity> {
+  async getActor(actorName: string): Promise<ActorNode> {
     const result = await this.neo4jService.read(
       `
     MATCH (actor:Person {name: $actorName})-[:ACTED_IN]->(movie:Movie)
@@ -35,8 +35,8 @@ export class AppService {
     if (result.records.length === 0) throw new NotFoundException();
 
     const record = result.records[0];
-    const actor = map(record, 'actor', ActorEntity);
-    actor.movies = mapArray(record, 'movies', MovieEntity);
+    const actor = map(record, 'actor', ActorNode);
+    actor.movies = mapArray(record, 'movies', MovieNode);
 
     return actor;
   }
@@ -52,8 +52,8 @@ export class AppService {
       )
       .subscribe({
         onNext: (record) => {
-          const actor = map(record, 'actor', ActorEntity);
-          actor.movies = mapArray(record, 'movies', MovieEntity);
+          const actor = map(record, 'actor', ActorNode);
+          actor.movies = mapArray(record, 'movies', MovieNode);
           console.log(`Actor with Movies: ${JSON.stringify(actor)}`);
         },
       });
