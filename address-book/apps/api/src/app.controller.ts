@@ -1,18 +1,12 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ActorNode } from './actors/nodes/actor.node';
 
-@Controller('actors')
+@Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get()
-  async getActors(): Promise<ActorNode[]> {
-    return this.appService.getActors();
-  }
-
-  @Get(':actorName')
-  async getActor(@Param('actorName') actorName: string): Promise<ActorNode> {
-    return this.appService.getActor(actorName);
+  async getHello() {
+    return this.appService.getHello();
   }
 }

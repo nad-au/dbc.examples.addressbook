@@ -1,16 +1,14 @@
-import { map, mapArray, Neo4jService, Transaction } from '@dbc-tech/nest-neo4j';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { map, mapArray, Transaction } from '@dbc-tech/nest-neo4j';
+import { Injectable } from '@nestjs/common';
 import { MovieNode } from '../movies/nodes/movie.node';
 import { GetActorOptions } from './dtos/get-actor-options';
 import { ActorNode } from './nodes/actor.node';
 
 @Injectable()
 export class ActorAccessor {
-  constructor(private readonly neo4jService: Neo4jService) {}
-
   async getActors(
     tx: Transaction,
-    options: GetActorOptions,
+    options?: GetActorOptions,
   ): Promise<ActorNode[]> {
     const query = options?.include?.includes('movies')
       ? `
@@ -33,22 +31,29 @@ export class ActorAccessor {
     });
   }
 
-  async getActor(actorName: string): Promise<ActorNode> {
-    const result = await this.neo4jService.read(
-      `
+  async getActor(
+    tx: Transaction,
+    actorName: string,
+    options?: GetActorOptions,
+  ): Promise<ActorNode> {
+    const query = options?.include?.includes('movies')
+      ? `
     MATCH (actor:Person {name: $actorName})-[:ACTED_IN]->(movie:Movie)
     RETURN actor, COLLECT(movie) AS movies
-  `,
-      {
-        actorName,
-      },
-    );
-    if (result.records.length === 0) throw new NotFoundException();
+        `
+      : `
+    MATCH (actor:Person {name: $actorName})
+    RETURN actor
+         `;
+    const result = await tx.run(query, { actorName });
+
+    if (result.records.length === 0) return null;
 
     const record = result.records[0];
     const actor = map(record, 'actor', ActorNode);
-    actor.movies = mapArray(record, 'movies', MovieNode);
-
+    if (record.has('movies')) {
+      actor.movies = mapArray(record, 'movies', MovieNode);
+    }
     return actor;
   }
 }

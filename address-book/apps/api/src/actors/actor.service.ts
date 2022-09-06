@@ -1,6 +1,5 @@
-import { map, mapArray, Neo4jService, Transaction } from '@dbc-tech/nest-neo4j';
+import { Neo4jService } from '@dbc-tech/nest-neo4j';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MovieNode } from '../movies/nodes/movie.node';
 import { ActorAccessor } from './actor.accessor';
 import { GetActorOptions } from './dtos/get-actor-options';
 import { ActorNode } from './nodes/actor.node';
@@ -12,28 +11,21 @@ export class ActorService {
     private readonly actorAccessor: ActorAccessor,
   ) {}
 
-  async getActors(options: GetActorOptions): Promise<ActorNode[]> {
+  async getActors(options?: GetActorOptions): Promise<ActorNode[]> {
     return this.neo4jService.transaction((tx) =>
       this.actorAccessor.getActors(tx, options),
     );
   }
 
-  async getActor(actorName: string): Promise<ActorNode> {
-    const result = await this.neo4jService.read(
-      `
-    MATCH (actor:Person {name: $actorName})-[:ACTED_IN]->(movie:Movie)
-    RETURN actor, COLLECT(movie) AS movies
-  `,
-      {
-        actorName,
-      },
-    );
-    if (result.records.length === 0) throw new NotFoundException();
+  async getActor(
+    actorName: string,
+    options?: GetActorOptions,
+  ): Promise<ActorNode> {
+    return this.neo4jService.transaction(async (tx) => {
+      const actor = await this.actorAccessor.getActor(tx, actorName, options);
+      if (!actor) throw new NotFoundException();
 
-    const record = result.records[0];
-    const actor = map(record, 'actor', ActorNode);
-    actor.movies = mapArray(record, 'movies', MovieNode);
-
-    return actor;
+      return actor;
+    });
   }
 }

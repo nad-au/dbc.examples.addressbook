@@ -1,6 +1,7 @@
 import { Neo4jModule } from '@dbc-tech/nest-neo4j';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ActorModule } from './actors/actor.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
@@ -18,6 +19,7 @@ import { AppService } from './app.service';
       database: 'neo4j',
       disableLosslessIntegers: true,
     }),
+    ActorModule,
   ],
   controllers: [AppController],
   providers: [AppService],

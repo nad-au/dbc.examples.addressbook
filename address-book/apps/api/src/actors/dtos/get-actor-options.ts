@@ -7,5 +7,5 @@ export class GetActorOptions {
   @IsString({ each: true })
   @Type(() => String)
   @Transform(({ value }) => value.split(',').map((v: string) => v.trim()))
-  include?: ('movies')[];
+  include?: 'movies'[];
 }
