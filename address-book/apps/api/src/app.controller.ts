@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
-import { ActorNode } from './entities/actor.node';
+import { ActorNode } from './actors/nodes/actor.node';
 
 @Controller('actors')
 export class AppController {

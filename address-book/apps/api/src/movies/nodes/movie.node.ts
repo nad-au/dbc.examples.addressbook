@@ -1,5 +1,5 @@
-import { HasId } from './hasid.interface';
-import { HasLabels } from './haslabels.interface';
+import { HasId } from '../../common/interfaces/hasid.interface';
+import { HasLabels } from '../../common/interfaces/haslabels.interface';
 
 export class MovieNode implements HasId, HasLabels {
   labels: string[];
