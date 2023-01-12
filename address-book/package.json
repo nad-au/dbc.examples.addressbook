@@ -21,7 +21,7 @@
     "node": ">=14.0.0"
   },
   "dependencies": {
-    "class-validator": "^0.13.2"
+    "class-validator": "^0.14.0"
   },
   "packageManager": "npm@8.5.0"
 }
